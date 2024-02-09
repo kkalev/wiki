@@ -6,7 +6,7 @@
 
 # Admin Guide
 ## Introduction
-
+![294701313-c10bfcac-ce04-4cbe-9da2-7985c8c3b092](https://github.com/kkalev/wiki/assets/2707736/1dde5d6f-6932-4ae4-b16d-3b4cfb9d0e4d)
 * Main virtualization technologies used:
   - Kernel based Virtual Machines (KVM)
   - Container based virtualization (LXC)
@@ -19,14 +19,14 @@
 * Proxmox VE server at hosting provider, with public IP ranges for Guests
   - For this setup, you can use either a `Bridged` or `Routed` model, depending on what your provider allows
 #### Bridged Configuration
-
+![294702578-5b1e88e6-9be0-461f-8f36-b7a53a2132c3](https://github.com/kkalev/wiki/assets/2707736/62ec9b60-359a-442b-9af6-0bf96622f5c6)
 * Bridges are like physical network switches implemented in software. All virtual guests can share a single bridge, or you can create multiple bridges to separate network domains. Each host can have up to 4094 bridges.
 * The installation program creates a single bridge named `vmbr0`, which is connected to the first Ethernet card. 
 * Virtual machines behave as if they were directly connected to the physical network. The network, in turn, sees each virtual machine as **having its own MAC**, even though there is only one network cable connecting all of these VMs to the network.
 #### Routed Configuration
 * Most hosting providers do not support the above setup. For security reasons, they disable networking as soon as they detect multiple MAC addresses on a single interface.
 * You can avoid the problem by “routing” all traffic via a single interface. This makes sure that all network packets use the same MAC address.
-
+![294702664-f4f00a50-d1c7-4d2d-a755-3e6a98ab75c0](https://github.com/kkalev/wiki/assets/2707736/d3633434-bd04-460a-be53-057bc82ae098)
 * A common scenario is that you have a public IP (assume `198.51.100.5` for this example), and an additional IP block for your VMs (`203.0.113.16/28`).
 ## Cluster Manager
 * The Proxmox VE cluster stack requires a reliable network with latencies under 5 milliseconds (LAN performance) between all nodes to operate stably. While on setups with a small node count a network with higher latencies may work, this is not guaranteed and gets rather unlikely with more than three nodes and latencies above around 10 ms.
@@ -36,7 +36,7 @@
 * There are basically two different classes of storage types:
   - `File level storage`: File level based storage technologies allow access to a fully featured (POSIX) file system. They are in general more flexible than any Block level storage and allow you to store content of any type. ZFS is probably the most advanced system, and it has full support for snapshots and clones.
   - `Block level storage`: Allows to store large raw images. It is usually not possible to store other files (ISO, backups, ..) on such storage types.
-
+![294750182-ba3fdbc4-7270-4605-9d5d-5193268537ac](https://github.com/kkalev/wiki/assets/2707736/475d3ef8-58a9-4edc-aca7-3eea325535a5)
 * A number of storages, and the QEMU image format qcow2, support thin provisioning. With thin provisioning activated, only the blocks that the guest system actually use will be written to the storage.
 * All storage types which have the **Snapshots** feature also support thin provisioning.
 ### LVM
@@ -126,7 +126,7 @@
 ### Authentication Realms
 * The following realms (authentication methods) are available:
   - `Linux PAM Standard Authentication`: These users are created on the host system with commands such as `adduser`.
-  - `Proxmox VE Authentication Server``: This is the most convenient realm for small-scale (or even mid-scale) installations, where users do not need access to anything outside of Proxmox VE.
+  - `Proxmox VE Authentication Server`: This is the most convenient realm for small-scale (or even mid-scale) installations, where users do not need access to anything outside of Proxmox VE.
   - `LDAP`
   - `OpenID Connect`
 ### Two-Factor Authentication
