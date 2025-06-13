@@ -271,9 +271,12 @@ import java.util.Optional;
 
 @Service
 public class StudentService {
-    @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
     public Optional<Student> getStudentByUsername(String username) {
         return studentRepository.findById(username);
     }
