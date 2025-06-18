@@ -47,3 +47,71 @@ Using `vmtouch` to pre-load `.war` and deployed files into the OS cache can inde
 ---
 
 **Tip:** The best combination depends on your app and environment. For many web apps, combining OS-level page cache preloading (like `vmtouch`) with JVM flags like `-XX:TieredStopAtLevel=1` and CDS yields substantial improvements.
+
+# Specific tuning for Apereo CAS
+Here’s a targeted summary of JVM options and strategies to **minimize startup time** for Apereo CAS 6.6.x on Java 11 in Docker:
+
+---
+
+## Recommended JVM Options for Fast Startup
+
+### 1. **Tiered Compilation**
+- **Faster startup, some trade-off in peak performance:**
+  - `-XX:TieredStopAtLevel=1`  
+    (Stops at C1 compiler, makes JIT compilation lightweight and startup faster.)
+- **Default tiered compilation (good compromise):**
+  - Java 11 enables `-XX:+TieredCompilation` by default.  
+    (No need to specify unless you’ve disabled it.)
+
+### 2. **Heap Sizing**
+- **Smaller initial heap = less time to allocate on startup:**
+  - `-Xms256m -Xmx512m`  
+    (Adjust based on your CAS and expected load. For just fast startup, keep these small.)
+
+### 3. **Garbage Collection**
+- **Simple GC for fast startup in small/medium heaps:**
+  - `-XX:+UseSerialGC`  
+    (Low-overhead GC, good for startup speed. If your heap is larger, consider G1GC but SerialGC is fastest for small heaps.)
+
+### 4. **Class Data Sharing (CDS)**
+- **Leverage JVM’s CDS to accelerate class loading:**
+  - **Create a shared archive** (one-time setup, then reuse in Docker):
+    1. Run your app once with:  
+       `-Xshare:dump`
+    2. Use the generated archive in your container:
+       - `-Xshare:on -XX:SharedArchiveFile=/path/to/archive`
+
+### 5. **Entropy Source for Random**
+- **Avoid blocking on SecureRandom at startup:**
+  - `-Djava.security.egd=file:/dev/urandom`
+
+### 6. **Remove Unused Features**
+- Avoid loading unnecessary agents, debuggers, or profilers unless needed.
+
+---
+
+## Example JVM Startup Command
+
+```sh
+java \
+  -XX:TieredStopAtLevel=1 \
+  -Xms256m -Xmx512m \
+  -XX:+UseSerialGC \
+  -Djava.security.egd=file:/dev/urandom \
+  -Xshare:on \
+  -XX:SharedArchiveFile=/cas-cds.jsa \
+  -jar cas.war
+```
+
+- Adjust `-Xms`/`-Xmx` for your real workload after measuring.
+- Replace `/cas-cds.jsa` with your actual CDS archive path.
+
+---
+
+## Docker Tips
+
+- **Layer your WAR and dependencies early in your Dockerfile** to maximize image caching.
+- **Use `vmtouch`** as you mentioned, to pre-warm the image if disk I/O is a bottleneck (especially on cold starts).
+- **Keep your container base image minimal** (e.g., `openjdk:11-jre-slim`).
+
+---
