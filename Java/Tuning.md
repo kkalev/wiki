@@ -47,6 +47,7 @@ Using `vmtouch` to pre-load `.war` and deployed files into the OS cache can inde
 ---
 
 **Tip:** The best combination depends on your app and environment. For many web apps, combining OS-level page cache preloading (like `vmtouch`) with JVM flags like `-XX:TieredStopAtLevel=1` and CDS yields substantial improvements.
+
 ----
 
 # Creating the shared class data archive
