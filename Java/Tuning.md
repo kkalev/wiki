@@ -47,7 +47,33 @@ Using `vmtouch` to pre-load `.war` and deployed files into the OS cache can inde
 ---
 
 **Tip:** The best combination depends on your app and environment. For many web apps, combining OS-level page cache preloading (like `vmtouch`) with JVM flags like `-XX:TieredStopAtLevel=1` and CDS yields substantial improvements.
+----
 
+# Creating the shared class data archive
+You **do not** run your actual application (e.g., your CAS WAR) with `-Xshare:dump`.  
+Instead, you run the **JVM alone** with `-Xshare:dump` to generate the shared class data archive (CDS).
+
+**How it works:**
+
+- The `-Xshare:dump` option tells the JVM to load all core classes and create a class data sharing archive, then exit. It does **not** start your application.
+
+- **Typical command to create the default CDS archive:**
+  ```sh
+  java -Xshare:dump
+  ```
+  This will generate (or regenerate) the archive, usually at `$JAVA_HOME/lib/server/classes.jsa`.
+
+- **To create a custom archive for your app’s classes** (advanced, e.g., with AppCDS), you would use additional options (like `-XX:SharedArchiveFile` and a class list), but this is optional for most setups.
+
+---
+
+**Summary:**  
+- **You run the JVM with `-Xshare:dump` to create the archive—no application is run.**
+- **Later**, when running your CAS application, you use `-Xshare:on` (and `-XX:SharedArchiveFile=<path>` if using a custom archive) to take advantage of the archive for faster startup.
+
+Let me know if you want a full example workflow for generating and using a custom CDS archive for your CAS Docker setup!
+
+----
 # Specific tuning for Apereo CAS
 Here’s a targeted summary of JVM options and strategies to **minimize startup time** for Apereo CAS 6.6.x on Java 11 in Docker:
 
