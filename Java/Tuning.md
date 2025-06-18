@@ -72,9 +72,27 @@ Instead, you run the **JVM alone** with `-Xshare:dump` to generate the shared cl
 - **You run the JVM with `-Xshare:dump` to create the archive—no application is run.**
 - **Later**, when running your CAS application, you use `-Xshare:on` (and `-XX:SharedArchiveFile=<path>` if using a custom archive) to take advantage of the archive for faster startup.
 
-Let me know if you want a full example workflow for generating and using a custom CDS archive for your CAS Docker setup!
-
 ----
+
+# Custom appCDS archive
+
+- **Create a CDS archive for your application classes and dependencies.**
+- Example:
+  1. Create a class list:
+     ```sh
+     java -Xshare:off -XX:DumpLoadedClassList=cas.classlist -jar cas.war
+     ```
+  2. Generate the archive:
+     ```sh
+     java -Xshare:dump -XX:SharedClassListFile=cas.classlist -XX:SharedArchiveFile=cas-cds.jsa -cp cas.war
+     ```
+  3. Run with:
+     ```sh
+     java -Xshare:on -XX:SharedArchiveFile=cas-cds.jsa -jar cas.war
+     ```
+  - This can speed up class loading, but results may still be modest for very dynamic frameworks like Spring.
+----
+
 # Specific tuning for Apereo CAS
 Here’s a targeted summary of JVM options and strategies to **minimize startup time** for Apereo CAS 6.6.x on Java 11 in Docker:
 
